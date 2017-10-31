@@ -7,7 +7,7 @@ public class TxHandler {
      */
     public TxHandler(UTXOPool utxoPool) {
         // IMPLEMENT THIS
-        return null;
+        return;
     }
 
     /**

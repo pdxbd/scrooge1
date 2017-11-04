@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class TxHandler {
 
     /**
@@ -24,8 +26,24 @@ public class TxHandler {
      *     values; and false otherwise.
      */
     public boolean isValidTx(Transaction tx) {
-        // IMPLEMENT THIS
-        return false;
+        // IMPLEMENTING
+        boolean returnVal = false;
+
+        ArrayList<Transaction.Output> outputs = tx.getOutputs();
+
+        ArrayList<UTXO> utxos = pool.getAllUTXO();
+        for (UTXO utxo : utxos) {
+
+        }
+
+
+	for (Transaction.Output op : outputs) {
+	    pool.contains(op);        
+
+        }
+
+
+        return returnVal;
     }
 
     /**

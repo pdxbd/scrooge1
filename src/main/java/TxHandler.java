@@ -54,8 +54,48 @@ public class TxHandler {
      * updating the current UTXO pool as appropriate.
      */
     public Transaction[] handleTxs(Transaction[] possibleTxs) {
-        // IMPLEMENT THIS
-        return null;
+		Set<Transaction> txsSortedByFees = new TreeSet<>((tx1, tx2) -> {
+            double tx1Fees = calcTxFees(tx1);
+            double tx2Fees = calcTxFees(tx2);
+            return Double.valueOf(tx2Fees).compareTo(tx1Fees);
+        });
+
+        Collections.addAll(txsSortedByFees, possibleTxs);
+
+        Set<Transaction> acceptedTxs = new HashSet<>();
+        for (Transaction tx : txsSortedByFees) {
+            if (isValidTx(tx)) {
+                acceptedTxs.add(tx);
+                for (Transaction.Input in : tx.getInputs()) {
+                    UTXO utxo = new UTXO(in.prevTxHash, in.outputIndex);
+                    utxoPool.removeUTXO(utxo);
+                }
+                for (int i = 0; i < tx.numOutputs(); i++) {
+                    Transaction.Output out = tx.getOutput(i);
+                    UTXO utxo = new UTXO(tx.getHash(), i);
+                    utxoPool.addUTXO(utxo, out);
+                }
+            }
+        }
+
+        Transaction[] validTxArray = new Transaction[acceptedTxs.size()];
+        return acceptedTxs.toArray(validTxArray);
     }
 
+
+
+	private double calcTxFees(Transaction tx) {
+        double sumInputs = 0;
+        double sumOutputs = 0;
+        for (Transaction.Input in : tx.getInputs()) {
+            UTXO utxo = new UTXO(in.prevTxHash, in.outputIndex);
+            if (!utxoPool.contains(utxo) || !isValidTx(tx)) continue;
+            Transaction.Output txOutput = utxoPool.getTxOutput(utxo);
+            sumInputs += txOutput.value;
+        }
+        for (Transaction.Output out : tx.getOutputs()) {
+            sumOutputs += out.value;
+        }
+        return sumInputs - sumOutputs;
+    }
 }

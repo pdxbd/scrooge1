@@ -1,5 +1,8 @@
 import java.util.ArrayList;
 
+
+// 2017-11-12 a
+
 public class TxHandler {
 
     /**
@@ -38,7 +41,7 @@ public class TxHandler {
 
 
 	for (Transaction.Output op : outputs) {
-	    pool.contains(op);        
+	    // pool.contains(op);
 
         }
 

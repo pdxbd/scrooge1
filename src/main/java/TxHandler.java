@@ -36,7 +36,7 @@ public class TxHandler {
 		for (int i = 0; i < tx.numInputs(); i++) {
 		Transaction.Input in = tx.getInput(i);
 		UTXO utxo = new UTXO(in.prevTxHash, in.outputIndex);
-		Transaction.Output output = utxoPool.getTxOutput(utxo);
+		Transaction.Output output = pool.getTxOutput(utxo);
 		if (!pool.contains(utxo)) return false;
 		if (!Crypto.verifySignature(output.address, tx.getRawDataToSign(i), in.signature))
 			return false;
@@ -89,8 +89,8 @@ public class TxHandler {
         double sumOutputs = 0;
         for (Transaction.Input in : tx.getInputs()) {
             UTXO utxo = new UTXO(in.prevTxHash, in.outputIndex);
-            if (!utxoPool.contains(utxo) || !isValidTx(tx)) continue;
-            Transaction.Output txOutput = utxoPool.getTxOutput(utxo);
+            if (!pool.contains(utxo) || !isValidTx(tx)) continue;
+            Transaction.Output txOutput = pool.getTxOutput(utxo);
             sumInputs += txOutput.value;
         }
         for (Transaction.Output out : tx.getOutputs()) {

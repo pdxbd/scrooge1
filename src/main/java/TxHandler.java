@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 
-
-// 2017-11-12 a
+// 2017-11-12 c
 
 public class TxHandler {
 
@@ -29,25 +28,25 @@ public class TxHandler {
      *     values; and false otherwise.
      */
     public boolean isValidTx(Transaction tx) {
-        // IMPLEMENTING
-        boolean returnVal = false;
-
-        ArrayList<Transaction.Output> outputs = tx.getOutputs();
-
-        ArrayList<UTXO> utxos = pool.getAllUTXO();
-        for (UTXO utxo : utxos) {
-
-        }
-
-
-	for (Transaction.Output op : outputs) {
-	    // pool.contains(op);
-
-        }
-
-
-        return returnVal;
-    }
+		UTXOPool uniqueUtxos = new UTXOPool();
+		double previousTxOutSum = 0;
+		double currentTxOutSum = 0;
+		for (int i = 0; i < tx.numInputs(); i++) {
+		Transaction.Input in = tx.getInput(i);
+		UTXO utxo = new UTXO(in.prevTxHash, in.outputIndex);
+		Transaction.Output output = utxoPool.getTxOutput(utxo);
+		if (!utxoPool.contains(utxo)) return false;
+		if (!Crypto.verifySignature(output.address, tx.getRawDataToSign(i), in.signature))
+			return false;
+		if (uniqueUtxos.contains(utxo)) return false;
+		uniqueUtxos.addUTXO(utxo, output);
+		previousTxOutSum += output.value;
+		}
+		for (Transaction.Output out : tx.getOutputs()) {
+		if (out.value < 0) return false;
+		currentTxOutSum += out.value;
+		}
+		return previousTxOutSum >= currentTxOutSum;    }
 
     /**
      * Handles each epoch by receiving an unordered array of proposed transactions, checking each

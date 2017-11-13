@@ -1,6 +1,9 @@
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
-// 2017-11-12 c
+// 2017-11-12 d
 
 public class TxHandler {
 
@@ -13,7 +16,6 @@ public class TxHandler {
     private UTXOPool pool;
 
     public TxHandler(UTXOPool utxoPool) {
-        // IMPLEMENTED
         this.pool = new UTXOPool(utxoPool);
         return;
     }
@@ -35,7 +37,7 @@ public class TxHandler {
 		Transaction.Input in = tx.getInput(i);
 		UTXO utxo = new UTXO(in.prevTxHash, in.outputIndex);
 		Transaction.Output output = utxoPool.getTxOutput(utxo);
-		if (!utxoPool.contains(utxo)) return false;
+		if (!pool.contains(utxo)) return false;
 		if (!Crypto.verifySignature(output.address, tx.getRawDataToSign(i), in.signature))
 			return false;
 		if (uniqueUtxos.contains(utxo)) return false;
@@ -68,12 +70,12 @@ public class TxHandler {
                 acceptedTxs.add(tx);
                 for (Transaction.Input in : tx.getInputs()) {
                     UTXO utxo = new UTXO(in.prevTxHash, in.outputIndex);
-                    utxoPool.removeUTXO(utxo);
+                    pool.removeUTXO(utxo);
                 }
                 for (int i = 0; i < tx.numOutputs(); i++) {
                     Transaction.Output out = tx.getOutput(i);
                     UTXO utxo = new UTXO(tx.getHash(), i);
-                    utxoPool.addUTXO(utxo, out);
+                    pool.addUTXO(utxo, out);
                 }
             }
         }
@@ -81,8 +83,6 @@ public class TxHandler {
         Transaction[] validTxArray = new Transaction[acceptedTxs.size()];
         return acceptedTxs.toArray(validTxArray);
     }
-
-
 
 	private double calcTxFees(Transaction tx) {
         double sumInputs = 0;
